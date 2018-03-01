@@ -1,5 +1,5 @@
 @echo off
-title NVDA snapshots downloader
+title NVDA snapshot downloader
 :: Author: Alberto buffolino
 :: License: GPL V3
 setlocal enabledelayedexpansion
