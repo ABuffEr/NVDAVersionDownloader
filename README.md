@@ -1,10 +1,10 @@
 # NVDASnapshotDownloader
 
-A simple batch to download latest NVDA snapshots (master, next or RC).
+A simple .bat to download latest NVDA snapshots (alpha or beta).
 
 ## Note
 
-It requires wget or curl installed in same folder or system PATH.
+It requires wget, curl or powershell installed in same folder or system PATH.
 
 Tested on Windows 10.
 
