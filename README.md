@@ -10,4 +10,5 @@ Tested on Windows 10.
 
 ## Download
 
-Clone this repository or download a zip directly from [here.](https://codeload.github.com/ABuffEr/NVDASnapshotDownloader/zip/master)
+Download a zip directly from [here,](https://codeload.github.com/ABuffEr/NVDASnapshotDownloader/zip/master)
+or clone this repository.
