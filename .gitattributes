@@ -1,0 +1,2 @@
+# Set Windows end-of-line style
+*.bat eol=crlf
