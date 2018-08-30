@@ -4,6 +4,7 @@ title NVDA snapshot downloader
 :: License: GPL V3
 setlocal enabledelayedexpansion
 :: backup current codepage, and change it to 1252, more useful for translators
+:: saving in ANSI is recomended
 for /f "tokens=2 delims=:." %%a in ('chcp') do (set cp=%%a)
 chcp 1252>nul 2>&1
 wget --version>nul 2>nul
