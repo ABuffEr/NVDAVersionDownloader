@@ -3,6 +3,9 @@ title NVDA snapshot downloader
 :: Author: Alberto buffolino
 :: License: GPL V3
 setlocal enabledelayedexpansion
+:: backup current codepage, and change it to 1252, more useful for translators
+for /f "tokens=2 delims=:." %%a in ('chcp') do (set cp=%%a)
+chcp 1252>nul 2>&1
 wget --version>nul 2>nul
 if %errorlevel% == 0 (
  set using=wget
@@ -22,7 +25,7 @@ if %errorlevel% == 0 (
  echo install curl or wget, i.e. from:
  echo https://eternallybored.org/misc/wget/
  pause
- goto :eof
+ goto finish
 )
 
 :start
@@ -46,21 +49,21 @@ if %using% == powershell (
 if not exist %pageFile% (
  echo Error getting version info, please retry again later.
  pause
- goto :eof
+ goto finish
 )
 
 set /p snapshot=What NVDA snapshot you want? (alpha/beta): 
 if not %snapshot% == alpha if not %snapshot% == beta (
  echo %snapshot% is not a valid snapshot, please retry.
  pause
- goto :eof
+ goto finish
 )
 
 for /f "usebackq tokens=4 delims==" %%a in (`findstr /r "_%snapshot% _[0-9]*\.[0-9]%snapshot%" %pageFile%`) do (
  set line=%%a
  set cutline=!line:~0,-6!
  call :confirm !cutline!
- goto :eof
+ goto finish
 )
 
 :confirm
@@ -70,7 +73,10 @@ for /f "tokens=%tokens% delims=_" %%a in ("%~n1") do (set version=%%a)
 echo Latest %snapshot% is %version%
 set /p answer=Do you want to download it? (y/n): 
 if %answer% == y goto download
-if %answer% == n echo Oh, well... see you later^^!
+if %answer% == n (
+ echo Oh, well... see you later^^!
+ pause
+)
 goto :eof
 
 :download
@@ -78,6 +84,7 @@ echo Downloading...
 if %using% == powershell (echo %using% does not provide progress info, so, be patient...)
 %downloader% !cutline!
 del %pageFile%
+:: last in next line is bell char
 echo DONE^^! 
 pause
 goto :eof
@@ -85,3 +92,6 @@ goto :eof
 :psget
 powershell -command "(New-Object System.Net.WebClient).DownloadFile('%1', '%~dp0%~nx1')"
 goto :eof
+
+:finish
+chcp %cp%>nul 2>&1
