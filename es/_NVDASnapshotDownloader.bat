@@ -83,7 +83,7 @@ goto :eof
 
 :download
 echo Descargando...
-if %using% == powershell (echo %using% no proporciona información sobre el avance de la descarga, así que ten paciencia...)
+if %using% == powershell (echo %using% no proporciona información de progreso, así que ten paciencia...)
 %downloader% !cutline!
 del %pageFile%
 :: last in next line is bell char
