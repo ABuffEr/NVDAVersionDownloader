@@ -1,6 +1,6 @@
 # NVDASnapshotDownloader
 
-A simple .bat to download latest NVDA snapshots (alpha or beta).
+A simple .bat to download latest NVDA snapshots (from each branch available: rc, alpha, etc).
 
 Available in English (original project) and Spanish (thanks to @nvdaes).
 

@@ -4,7 +4,6 @@ title NVDA snapshot downloader
 :: License: GPL V3
 setlocal enabledelayedexpansion
 :: backup current codepage, and change it to 1252, more useful for translators
-:: saving in ANSI is recomended
 for /f "tokens=2 delims=:." %%a in ('chcp') do (set cp=%%a)
 chcp 1252>nul 2>&1
 wget --version>nul 2>nul
@@ -53,14 +52,19 @@ if not exist %pageFile% (
  goto finish
 )
 
-set /p snapshot=What NVDA snapshot you want? (alpha/beta): 
-if not %snapshot% == alpha if not %snapshot% == beta (
+set choices=,
+for /f "usebackq tokens=2 delims=<>" %%a in (`findstr "<h2>" %pageFile%`) do (set choices=!choices!, %%a)
+set choices=!choices:~3!
+set /p snapshot=What NVDA snapshot you want? (%choices%): 
+set stop=1
+for %%a in (%choices%) do (if %snapshot% == %%a set stop=0)
+if %stop% == 1 (
  echo %snapshot% is not a valid snapshot, please retry.
  pause
  goto finish
 )
 
-for /f "usebackq tokens=4 delims==" %%a in (`findstr /r "_%snapshot% _[0-9]*\.[0-9]%snapshot%" %pageFile%`) do (
+for /f "usebackq tokens=4 delims==" %%a in (`findstr "_%snapshot%" %pageFile%`) do (
  set line=%%a
  set cutline=!line:~0,-6!
  call :confirm !cutline!
@@ -68,9 +72,7 @@ for /f "usebackq tokens=4 delims==" %%a in (`findstr /r "_%snapshot% _[0-9]*\.[0
 )
 
 :confirm
-if %snapshot% == alpha set tokens=3
-if %snapshot% == beta set tokens=2
-for /f "tokens=%tokens% delims=_" %%a in ("%~n1") do (set version=%%a)
+for /f "tokens=3* delims=_" %%a in ("%~n1") do (set version=%%a%%b)
 echo Latest %snapshot% is %version%
 set /p answer=Do you want to download it? (y/n): 
 if %answer% == y goto download
