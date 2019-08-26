@@ -54,14 +54,19 @@ if not exist %pageFile% (
  goto finish
 )
 
-set /p snapshot=¿Qué versión en desarrollo de NVDA deseas? (alpha/beta): 
-if not %snapshot% == alpha if not %snapshot% == beta (
+set choices=,
+for /f "usebackq tokens=2 delims=<>" %%a in (`findstr "<h2>" %pageFile%`) do (set choices=!choices!, %%a)
+set choices=!choices:~3!
+set /p snapshot=¿Qué versión en desarrollo de NVDA deseas? (%choices%): 
+set stop=1
+for %%a in (%choices%) do (if %snapshot% == %%a set stop=0)
+if %stop% == 1 (
  echo %snapshot% no es una versión en desarrollo válida, por favor vuelve a intentarlo.
  pause
  goto finish
 )
 
-for /f "usebackq tokens=4 delims==" %%a in (`findstr /r "_%snapshot% _[0-9]*\.[0-9]%snapshot%" %pageFile%`) do (
+for /f "usebackq tokens=4 delims==" %%a in (`findstr "_%snapshot%" %pageFile%`) do (
  set line=%%a
  set cutline=!line:~0,-6!
  call :confirm !cutline!
@@ -69,9 +74,7 @@ for /f "usebackq tokens=4 delims==" %%a in (`findstr /r "_%snapshot% _[0-9]*\.[0
 )
 
 :confirm
-if %snapshot% == alpha set tokens=3
-if %snapshot% == beta set tokens=2
-for /f "tokens=%tokens% delims=_" %%a in ("%~n1") do (set version=%%a)
+for /f "tokens=3* delims=_" %%a in ("%~n1") do (set version=%%a%%b)
 echo La última %snapshot% es %version%
 set /p answer=¿Quieres descargarla? (s/n): 
 if %answer% == s goto download
