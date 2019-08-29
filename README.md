@@ -2,7 +2,7 @@
 
 A simple .bat to download latest NVDA snapshots (from each branch available: rc, alpha, etc).
 
-Available in English (original project), Spanish (thanks to @nvdaes) and French (thanks to @blindhelp).
+Available in English (original project), Spanish (thanks to @nvdaes ) and French (thanks to @blindhelp ).
 
 ## Installation
 
