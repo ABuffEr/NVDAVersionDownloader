@@ -2,7 +2,7 @@
 
 A simple .bat to download latest NVDA snapshots (from each branch available: rc, alpha, etc).
 
-Available in English (original project), Spanish (thanks to @nvdaes ) and French (thanks to @blindhelp ).
+Available in English (original project), Spanish (thanks to [@nvdaes][2]) and French (thanks to [@blindhelp][3]).
 
 ## Installation
 
@@ -21,3 +21,5 @@ It requires wget, curl or powershell installed in same folder or system PATH.
 Powershell should be present on almost all systems starting from XP.
 
 [1]: https://github.com/ABuffEr/NVDASnapshotDownloader/releases
+[2]: https://github.com/nvdaes
+[3]: https://github.com/blindhelp
