@@ -64,7 +64,7 @@ if %stop% == 1 (
  goto finish
 )
 
-for /f "usebackq tokens=4 delims==" %%a in (`findstr "_%snapshot%" %pageFile%`) do (
+for /f "usebackq tokens=4 delims==" %%a in (`findstr /r "_%snapshot% _[0-9]*\.[0-9]%snapshot%" %pageFile%`) do (
  set line=%%a
  set cutline=!line:~0,-6!
  call :confirm !cutline!
@@ -72,7 +72,8 @@ for /f "usebackq tokens=4 delims==" %%a in (`findstr "_%snapshot%" %pageFile%`) 
 )
 
 :confirm
-for /f "tokens=3* delims=_" %%a in ("%~n1") do (set version=%%a%%b)
+if %snapshot% == beta (set tokens=2) else (set tokens=3)
+for /f "tokens=%tokens%* delims=_" %%a in ("%~n1") do (set version=%%a%%b)
 echo Latest %snapshot% is %version%
 set /p answer=Do you want to download it? (y/n): 
 if %answer% == y goto download
