@@ -13,7 +13,7 @@ Available in English (original project), Spanish (thanks to [@nvdaes][2]), Frenc
 
 ## Compatibility
 
-Tested on Windows 7 and 10, but probably compatible with XP, Vista and Windows 8/8.1.
+Tested on Windows 7, 10 and 11, but reasonably compatible with XP, Vista and Windows 8/8.1.
 
 ## Note
 
