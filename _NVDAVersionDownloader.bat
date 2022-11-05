@@ -1,7 +1,7 @@
 @echo off
 title NVDA Version downloader
 :: Author: Alberto Buffolino
-:: Version: 4.0 (2022/10/09)
+:: Version: 4.1 (2022/11/05)
 :: License: GPL V3
 setlocal EnableDelayedExpansion
 :: flag to enable debug
@@ -80,30 +80,27 @@ goto :eof
 :start
 echo %usingMsg%
 echo %getVerMsg%
-set pageURL="https://www.nvaccess.org/files/nvda/snapshots/"
-set pageFile="%~dp0\NVDASnapshotsPage.htm"
+set snapURL="https://www.nvaccess.org/files/nvda/snapshots/"
+set snapPage="%~dp0\NVDASnapshotsPage.htm"
 if %using% == wget (
- wget -q %pageURL% -O %pageFile%
+ wget -q %snapURL% -O %snapPage%
  set downloader=wget -q --show-progress -c -N
 )
 if %using% == curl (
- curl --retry 2 -s %pageURL% -o %pageFile%
+ curl --retry 2 -s %snapURL% -o %snapPage%
  set downloader=curl --retry 2 --ssl -O -L -# -C -
 )
 if %using% == powershell (
- powershell -command "(New-Object System.Net.WebClient).DownloadFile('%pageURL%', '%pageFile%')"
+ powershell -command "(New-Object System.Net.WebClient).DownloadFile('%snapURL%', '%snapPage%')"
  set downloader=call :psget
 )
-if not exist %pageFile% (
- echo %errVerMsg%
- pause
- goto finish
-)
+call :checkSnapPage %snapPage%
+if %errorlevel% equ 1 goto finish
 set choices=,
-for /f "usebackq tokens=2 delims=<>" %%a in (`findstr "<h2>" %pageFile%`) do (
+for /f "usebackq tokens=2 delims=<>" %%a in (`findstr "<h2>" %snapPage%`) do (
  set choices=!choices!, %%a
 )
-findstr /r "_[0-9.]*rc[0-9]*" %pageFile%>nul 2>nul
+findstr /r "_[0-9.]*rc[0-9]*" %snapPage%>nul 2>nul
 if %errorlevel% == 0 (
  set choices=!choices!, rc
 )
@@ -125,12 +122,27 @@ if %snapshot% == stable (
  goto finish
 )
 :: manage other branches
-for /f "usebackq tokens=4 delims==" %%a in (`findstr /r "_%snapshot% _[0-9.]*%snapshot%" %pageFile%`) do (
+for /f "usebackq tokens=4 delims==" %%a in (`findstr /r "_%snapshot% _[0-9.]*%snapshot%" %snapPage%`) do (
  set line=%%a
  set fileURL=!line:~0,-6!
  call :confirmBranch !fileURL!
  goto finish
 )
+
+:checkSnapPage
+set stop=0
+if not exist %snapPage% (
+ set stop=1
+)
+:: snapPage is <= 1KB (site down?)
+if "%~z1" leq "1" (
+ set stop=1
+)
+if %stop% equ 1 (
+ echo %errVerMsg%
+ pause
+)
+exit /b %stop%
 
 :askStable
 set /p veranswer=%stableAsk% 
@@ -182,5 +194,5 @@ goto :eof
 :finish
 chcp %cp%>nul 2>&1
 if %debug% == 0 (
- del %pageFile%>nul 2>&1
+ del %snapPage%>nul 2>&1
 )
