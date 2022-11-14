@@ -1,7 +1,7 @@
 @echo off
 title NVDA Version downloader
 :: Author: Alberto Buffolino
-:: Version: 4.1 (2022/11/05)
+:: Version: 4.2 (2022/11/14)
 :: License: GPL V3
 setlocal EnableDelayedExpansion
 :: flag to enable debug
