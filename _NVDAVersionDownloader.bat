@@ -1,11 +1,11 @@
 @echo off
 title NVDA Version downloader
 :: Author: Alberto Buffolino
-:: Version: 4.2 (2022/11/14)
+:: Version: 4.3 (2025/06/13)
 :: License: GPL V3
 setlocal EnableDelayedExpansion
 :: flag to enable debug
-:: (no .htm deletion)
+:: (1 = no .htm deletion)
 set debug=0
 :: backup current codepage, and change it to 1252, more useful for translators
 for /f "tokens=2 delims=:." %%a in ('chcp') do (
@@ -79,33 +79,16 @@ goto :eof
 
 :start
 echo %usingMsg%
-echo %getVerMsg%
-set snapURL="https://www.nvaccess.org/files/nvda/snapshots/"
-set snapPage="%~dp0\NVDASnapshotsPage.htm"
 if %using% == wget (
- wget -q %snapURL% -O %snapPage%
  set downloader=wget -q --show-progress -c -N
 )
 if %using% == curl (
- curl --retry 2 -s %snapURL% -o %snapPage%
  set downloader=curl --retry 2 --ssl -O -L -# -C -
 )
 if %using% == powershell (
- powershell -command "(New-Object System.Net.WebClient).DownloadFile('%snapURL%', '%snapPage%')"
  set downloader=call :psget
 )
-call :checkSnapPage %snapPage%
-if %errorlevel% equ 1 goto finish
-set choices=,
-for /f "usebackq tokens=2 delims=<>" %%a in (`findstr "<h2>" %snapPage%`) do (
- set choices=!choices!, %%a
-)
-findstr /r "_[0-9.]*rc[0-9]*" %snapPage%>nul 2>nul
-if %errorlevel% == 0 (
- set choices=!choices!, rc
-)
-set choices=!choices!, stable
-set choices=!choices:~3!
+set choices=alpha, beta, rc, stable
 set /p snapshot=%snapAsk% (%choices%): 
 set stop=1
 for %%a in (%choices%) do (
@@ -122,20 +105,58 @@ if %snapshot% == stable (
  goto finish
 )
 :: manage other branches
-for /f "usebackq tokens=4 delims==" %%a in (`findstr /r "_%snapshot% _[0-9.]*%snapshot%" %snapPage%`) do (
- set line=%%a
- set fileURL=!line:~0,-6!
- call :confirmBranch !fileURL!
+if %snapshot% == rc (
+ set pageURL=https://download.nvaccess.org/releases/
+ set search="href=.*rc.*/"
+)
+if %snapshot% == beta (
+ set pageURL=https://download.nvaccess.org/releases/beta/
+ set search="href=.*\.exe"
+)
+if %snapshot% == alpha (
+ set pageURL=https://download.nvaccess.org/snapshots/alpha/
+ set search="href=.*\.exe"
+)
+set pageFile="%~dp0\NVDASnapshotsPage.htm"
+call :getSnapPage !pageURL! !pageFile!
+if %errorlevel% equ 1 goto finish
+for /f "usebackq tokens=3 delims== " %%a in (`findstr %search% %pageFile%`) do (
+ if %snapshot% == rc (
+  call :confirmRC %pageURL% %%~a
+ ) else (
+  set fileURL="%pageURL%%%~a"
+  call :confirmBranch !fileURL!
+ )
  goto finish
 )
 
+:askStable
+set /p veranswer=%stableAsk% 
+set fileURL="https://download.nvaccess.org/download/releases/%veranswer%/nvda_%veranswer%.exe"
+set /p answer=%stableWarn% (%yes%/%no%): 
+call :yesNoAnswers %answer%
+goto :eof
+
+:getSnapPage
+set snapURL=%1
+set snapPage=%2
+echo %getVerMsg%
+if %using% == wget (
+ wget -q %snapURL% -O %snapPage%
+)
+if %using% == curl (
+ curl --retry 2 -s %snapURL% -o %snapPage%
+)
+if %using% == powershell (
+ powershell -command "(New-Object System.Net.WebClient).DownloadFile('%snapURL%', '%snapPage%')"
+)
 :checkSnapPage
 set stop=0
 if not exist %snapPage% (
  set stop=1
 )
 :: snapPage is <= 1KB (site down?)
-if "%~z1" leq "1" (
+if "%~z2" leq "1" (
  set stop=1
 )
 if %stop% equ 1 (
@@ -144,12 +165,11 @@ if %stop% equ 1 (
 )
 exit /b %stop%
 
-:askStable
-set /p veranswer=%stableAsk% 
-set fileURL="https://www.nvaccess.org/download/nvda/releases/%veranswer%/nvda_%veranswer%.exe"
-set /p answer=%stableWarn% (%yes%/%no%): 
-call :yesNoAnswers %answer%
-goto :eof
+:confirmRC
+set version=%2
+set version=%version:/=%
+set fileURL="%1%2nvda_%version%.exe"
+goto :confirmChoice
 
 :confirmBranch
 set vertokens=0
@@ -163,6 +183,7 @@ for /f "tokens=1* delims=_" %%a in ("%verstring%") do (
 for /f "tokens=%vertokens%* delims=_" %%a in ("%~n1") do (
  set version=%%a%%b
 )
+:confirmChoice
 echo %lastVerMsg%
 set /p answer=%downAsk% (%yes%/%no%): 
 call :yesNoAnswers %answer%
